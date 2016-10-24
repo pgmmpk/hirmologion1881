@@ -1,0 +1,156 @@
+\ProvidesPackage{hirmologion}
+
+\RequirePackage{fontspec}
+\RequirePackage{polyglossia}
+	\setdefaultlanguage{churchslavonic}
+	\newfontfamily\ponomarfont[Script=Cyrillic,Ligatures=TeX,HyphenChar="005F]{PonomarUnicode.otf}
+	\newfontfamily\ponomarexpandedfont[Script=Cyrillic,Ligatures=TeX,HyphenChar="005F,LetterSpace=10.0]{PonomarUnicode.otf}
+	\let\churchslavonicfont=\ponomarfont
+	\newfontfamily\pomorskyfont[Script=Cyrillic,Ligatures=TeX,HyphenChar="005F]{PomorskyUnicode.otf}
+
+\RequirePackage{churchslavonic}
+\RequirePackage{lettrine}
+\RequirePackage{refcount}
+%\usepackage{draftwatermark}
+\RequirePackage{fwlw}
+\RequirePackage[unicode=true,debug=true]{hyperref}
+
+\churchslavonicfont
+\setstocksize{16.8cm}{12.5cm}
+\settrimmedsize{14.8cm}{10.5cm}{*}
+\settrims{1cm}{1cm}
+\settypeblocksize{10.5cm}{7.0cm}{*}
+\setlrmargins{1.5cm}{*}{*}
+\setulmargins{1.5cm}{*}{*}
+\setlength{\headsep}{0.5em}
+\setlength{\footskip}{0.5em}
+\parskip 0pt plus 1pt
+\parindent 0em
+\linespread{1.2}
+\lineskip=0pt
+\lineskiplimit=-10pt
+\flushbottom
+\footskip=20pt
+\headsep=10pt
+\sloppybottom
+\checkandfixthelayout[lines]
+
+%
+% print page number on the stock, above trim edge
+%
+\newcommand*{\hi@trimseqpage}{%
+\begin{picture}(0,0)
+\unitlength 1mm
+\put(0,2){\makebox(0,0)[b]{\footnotesize листъ \thesheetsequence}}
+\end{picture}}
+\let\tmarktm\hi@trimseqpage
+
+%
+% define Hirmologion page styles
+%
+\makepagestyle{hirmologion}
+  \makeoddhead{hirmologion}{}{\leftmark}{\hbox {\vbox to 0 pt {\cuNum{\numexpr\thepage/2\relax}\vss}}}
+  \makeevenhead{hirmologion}{}{\rightmark}{}
+  \makeevenfoot{hirmologion}{}{}{\tiny\usebox\NextWordBox}
+  \makeoddfoot{hirmologion}{}{}{\tiny\usebox\NextWordBox}
+\makepagestyle{hirmologion-nohead}
+  \makeevenfoot{hirmologion-nohead}{}{}{\tiny\usebox\NextWordBox}
+  \makeoddfoot{hirmologion-nohead}{}{}{\tiny\usebox\NextWordBox}
+\makepagestyle{hirmologion-simplehead}
+  \makeoddhead{hirmologion-simplehead}{}{}{\hbox{\vbox to 0 pt{\cuNum{\numexpr\thepage/2\relax}\vss}}}
+  \makeevenfoot{hirmologion-simplehead}{}{}{\usebox\NextWordBox}
+  \makeoddfoot{hirmologion-simplehead}{}{}{\usebox\NextWordBox}
+
+%
+% ToC helpers
+%
+\def\hi@prevPage{0}%
+\def\hPageref#1{%
+\bgroup
+\edef\x{\getpagerefnumber{#1}}%
+\edef\hi@ppg{\the\numexpr (\x+1)/2\relax}
+\hyperlink{#1}{%
+ли́стъ
+\ifx\hi@prevPage\hi@ppg\relax тойже\else\cuNum{\hi@ppg}\fi
+\global\edef\hi@prevPage{\hi@ppg}%
+\expandafter\ifodd\x\relax\else \space на ѡ҆боро́тѣ\fi
+}%
+\egroup
+}% 
+
+%
+% shorthand for kinovar
+%
+\let\hKv\cuKinovar
+
+\def\cuSec{\@ifstar\@cuSecStarred\@cuSecUnStarred}
+\def\@cuSecStarred#1#2{
+\cuSubSec{#1 #2}%
+}%
+\def\@cuSecUnStarred#1#2{%
+\unskip
+\global\edef\hCurrentSong{#1}%
+\global\edef\hCurrentTone{#2}%
+\markboth{\hCurrentSong}{\hCurrentTone}%
+\@cuSecStarred{#1}{#2}%
+}%
+\def\cuCenter#1{%
+{\par\centering #1\par\nobreak}%
+}%
+\def\cuKinovarCenter#1{%
+\cuCenter{\cuKinovarColor #1}%
+}%
+
+\def\hi@CurrentSong{}
+\def\hi@CurrentTone{}
+\def\hSong#1{%
+\global\edef\hi@CurrentSong{#1}%
+\markboth{\hi@CurrentSong}{\hi@CurrentTone}%
+{\centering \cuKinovar{#1}\par\nobreak}%
+}%
+\def\hTone#1{%
+\global\edef\hi@CurrentTone{#1}%
+\markboth{\hi@CurrentSong}{\hi@CurrentTone}%
+{\centering \cuKinovar{#1}\par\nobreak}%
+}%
+\newcommand{\cuSubSec}[1]{{%
+% adapted from The TeXBook 14.30 - MK
+\unskip
+\ifvmode\vskip 0em\leavevmode\hskip 0pt plus -1fill\fi
+\nobreak\hfill\penalty1000%
+\hskip0.5em\nobreak\hbox{}\nobreak\hfil\nobreak\hbox{\cuKinovarColor #1}\nobreak\hfil\nobreak\hbox{}\nobreak\parfillskip=0pt \finalhyphendemerits=0 \par
+%\nobreak % !!!!! interferes with memoir pfbreak feature. why???
+}}%
+
+\def\hChapter[#1]#2#3#4#5{%
+\cuCenter{#2}%
+\cuSec{#3}{#4}\label{#1}%
+}%
+
+\def\cu@lettrine{\lettrine[lines=3,findent=0pt,nindent=0pt,loversize=-0.1,lhang=0.15]}
+\def\cuLettrine{\cu@tokenizeletter\cu@lettrine}
+\renewcommand{\LettrineFontHook}{\cuKinovarColor\ponomarfont}
+
+\let\hMn=\cuMarginMark
+%
+% increase inter-word spacing a little bit
+%
+\fontdimen2\font=0.8ex% inter word space
+\fontdimen3\font=1.6ex% inter word stretch
+\fontdimen4\font=0.4ex% inter word shrink
+\widowpenalty=1
+\clubpenalty=1
+\hyphenpenalty=10
+%
+% Make every label a hyperlink target
+%
+\let\old@label=\label
+\def\label#1{\old@label{#1}\hypertarget{#1}{}}
+
+
+\def\centergraphics[#1]#2{%
+\hbox to \textwidth{\hskip-0.5\textwidth\hfil\includegraphics[#1]{#2}\hfil\hskip-0.5\textwidth}%
+}
+
+\def\marginNote#1{\marginpar{{\small\cuKinovarColor #1}}}
+\endinput
